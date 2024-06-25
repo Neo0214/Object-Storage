@@ -45,9 +45,20 @@ namespace Object_Storage
                 return null;
             }
         }
-        public bool delete()
+        public bool delete(string hashName)
         {
-            return true;
+            string filePath = Path.Combine(folder, hashName + ".oss");
+            try
+            {
+                File.Delete(filePath);
+                Console.WriteLine($"File deleted : {filePath}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An error occurred: " + ex.Message);
+                return false;
+            }
         }
         public string generateName(byte[] bytes)
         {
