@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using MyLock;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -8,7 +9,24 @@ namespace Object_Storage
     public class ObjectStorageContext
     {
         private string folder;
-        public ObjectStorageContext()
+        private static ObjectStorageContext _instance;
+        private MyReaderWriterLockSlim _lock;
+        public static ObjectStorageContext Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new ObjectStorageContext();
+                }
+                else
+                {
+                    Console.WriteLine("WARN: You're re-instancing OSS Context.");
+                }
+                return _instance;
+            }
+        }
+        private ObjectStorageContext()
         {
 
             string currentDirectory = Directory.GetCurrentDirectory();
@@ -27,6 +45,8 @@ namespace Object_Storage
                 // 如果文件夹已存在，输出提示
                 Console.WriteLine("Object Storage init OK");
             }
+            // init lock
+            _lock = new MyReaderWriterLockSlim();
         }
         public string store(byte[] bytes)
         {
@@ -35,29 +55,49 @@ namespace Object_Storage
             // 写入文件内容
             try
             {
+                _lock.EnterWriteLock();
                 File.WriteAllBytes(filePath, bytes);
+                _lock.ExitWriteLock();
                 Console.WriteLine($"File written to: {filePath}");
                 return fileName;
             }
             catch (Exception ex)
             {
-                Console.WriteLine("An error occurred: " + ex.Message);
+                Console.WriteLine("OSS Error: " + ex.Message);
                 return null;
             }
         }
-        public bool delete(string hashName)
+        public bool delete(string fileName)
         {
-            string filePath = Path.Combine(folder, hashName + ".oss");
+            string filePath = Path.Combine(folder, fileName + ".oss");
             try
             {
+                _lock.EnterWriteLock();
                 File.Delete(filePath);
+                _lock.ExitWriteLock();
                 Console.WriteLine($"File deleted : {filePath}");
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine("An error occurred: " + ex.Message);
+                Console.WriteLine("OSS Error: " + ex.Message);
                 return false;
+            }
+        }
+        public byte[] fetchFile(string fileName)
+        {
+            string filePath = Path.Combine(folder, fileName + ".oss");
+            try
+            {
+                _lock.EnterReadLock();
+                byte[] bytes = File.ReadAllBytes(filePath);
+                _lock.ExitReadLock();
+                return bytes;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("OSS Error: " + ex.Message);
+                return null;
             }
         }
         public string generateName(byte[] bytes)
