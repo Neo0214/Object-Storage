@@ -48,7 +48,8 @@ namespace Object_Storage
             // init lock
             _lock = new MyReaderWriterLockSlim();
         }
-        public string store(byte[] bytes)
+
+        private void storeTask(byte[] bytes, ref string name)
         {
             string fileName = generateName(bytes);
             string filePath = Path.Combine(folder, fileName + ".oss");
@@ -59,15 +60,24 @@ namespace Object_Storage
                 File.WriteAllBytes(filePath, bytes);
                 _lock.ExitWriteLock();
                 Console.WriteLine($"File written to: {filePath}");
-                return fileName;
+                name = fileName;
+                return;
             }
             catch (Exception ex)
             {
                 Console.WriteLine("OSS Error: " + ex.Message);
-                return null;
+                name = null;
             }
         }
-        public bool delete(string fileName)
+        public string store(byte[] bytes)
+        {
+            string fileName = "";
+            Thread thread = new Thread(() => storeTask(bytes, ref fileName));
+            thread.Start();
+            thread.Join();
+            return fileName;
+        }
+        private void deleteTask(string fileName, ref bool isOk)
         {
             string filePath = Path.Combine(folder, fileName + ".oss");
             try
@@ -76,15 +86,25 @@ namespace Object_Storage
                 File.Delete(filePath);
                 _lock.ExitWriteLock();
                 Console.WriteLine($"File deleted : {filePath}");
-                return true;
+                isOk = true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine("OSS Error: " + ex.Message);
-                return false;
+                isOk = false;
             }
         }
-        public byte[] fetchFile(string fileName)
+
+        public bool delete(string fileName)
+        {
+            bool isOK = false;
+            Thread thread = new Thread(() => deleteTask(fileName, ref isOK));
+            thread.Start();
+            thread.Join();
+            return isOK;
+
+        }
+        private void fetchTask(ref byte[] content, string fileName)
         {
             string filePath = Path.Combine(folder, fileName + ".oss");
             try
@@ -92,13 +112,23 @@ namespace Object_Storage
                 _lock.EnterReadLock();
                 byte[] bytes = File.ReadAllBytes(filePath);
                 _lock.ExitReadLock();
-                return bytes;
+                content = bytes;
             }
             catch (Exception ex)
             {
                 Console.WriteLine("OSS Error: " + ex.Message);
-                return null;
+                content = null;
             }
+        }
+        public byte[] fetchFile(string fileName)
+        {
+            byte[] content = null;
+            Thread thread = new Thread(() => fetchTask(ref content, fileName));
+            thread.Start();
+            thread.Join();
+            return content;
+
+
         }
         public string generateName(byte[] bytes)
         {
