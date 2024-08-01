@@ -8,11 +8,11 @@ Dies ist ein Klassendateispeichersystem für die Backend-Entwicklung mit C# ASP.
 
 ### Documents Supported language
 
-- [Chinese Simplify](#CHS)
-- [English](#ENG)
-- [German](#DEU)
+- Chinese Simplify
+- English
+- German
 
-## 使用方法  {#CHS}
+## 使用方法  
 
 ### 1 添加服务
 
@@ -55,9 +55,9 @@ namespace YourProject.Repo
 }
 ```
 
-- 使用三个接口完成业务，[接口文档](#APICHS)
+- 使用三个接口完成业务，请看接口文档
 
-## Usage {#ENG}
+## Usage
 
 ### 1 Add Your Service
 
@@ -100,11 +100,11 @@ namespace YourProject.Repo
 }
 ```
 
-- Use the three interface to complete your business. [The Interface Document](#APIENG)
+- Use the three interface to complete your business. See The Interface Document
 
   
 
-## Gebrauchsanweisung {#DEU}
+## Gebrauchsanweisung
 
 ### 1 Dienst hinzufügen
 
@@ -147,11 +147,11 @@ namespace YourProject.Repo
 }
 ```
 
-- Verwenden Sie drei Schnittstellen, um die Geschäftslogik abzuschließen. [Schnittstellendokumentation](#APIDEU)
+- Verwenden Sie drei Schnittstellen, um die Geschäftslogik abzuschließen.
 
 
 
-## 接口文档{#APICHS}
+## 接口文档
 
 #### public string store(byte[] bytes)
 
@@ -165,7 +165,7 @@ namespace YourProject.Repo
 
 获取指定id码的文件内容（@param string fileName）， 并返回文件内容（@return byte[])
 
-## API{#APIENG}
+## API
 
 #### public string store(byte[] bytes)
 
@@ -179,7 +179,7 @@ Delete content with a certain ID key（@param string fileName），and return wh
 
 Fetch content with a certain ID key（@param string fileName）， and return the content（@return byte[])
 
-## API-Dokumentation{#APIDEU}
+## API-Dokumentation
 
 #### public string store(byte[] bytes)
 
